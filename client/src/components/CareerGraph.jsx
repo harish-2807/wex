@@ -24,10 +24,10 @@ const RADIUS = {
 };
 
 const RELATIONSHIPS = [
-  { label: 'RELATED_TO', color: '#94a3b8' },
-  { label: 'REQUIRED_BY', color: '#94a3b8' },
-  { label: 'OFFERED_BY', color: '#94a3b8' },
-  { label: 'LOCATED_IN', color: '#94a3b8' },
+  { label: 'RELATED_TO', color: '#64748b' },
+  { label: 'REQUIRED_BY', color: '#64748b' },
+  { label: 'OFFERED_BY', color: '#64748b' },
+  { label: 'LOCATED_IN', color: '#64748b' },
 ];
 
 function buildGraphData(paths, opps) {
@@ -68,7 +68,13 @@ function buildGraphData(paths, opps) {
     addLink(companyId, locationId, 'LOCATED_IN');
   });
 
-  let finalNodes = Array.from(nodes.values());
+  const indexedNodes = Array.from(nodes.values());
+  indexedNodes.forEach((node, i) => {
+    node.x = node.x ?? Math.cos((i * 2 * Math.PI) / indexedNodes.length) * 180;
+    node.y = node.y ?? Math.sin((i * 2 * Math.PI) / indexedNodes.length) * 180;
+  });
+
+  let finalNodes = indexedNodes;
   if (finalNodes.length > MAX_NODES) {
     finalNodes = finalNodes.slice(0, MAX_NODES);
   }
@@ -81,21 +87,37 @@ function buildGraphData(paths, opps) {
 }
 
 function useContainerWidth() {
-  const ref = useRef(null);
   const [width, setWidth] = useState(0);
+  const observerRef = useRef(null);
 
-  useEffect(() => {
-    if (!ref.current) return undefined;
+  const containerRef = useCallback((node) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+    if (!node) return;
+    const measure = () => {
+      const w = Math.floor(node.clientWidth);
+      if (w > 0) setWidth(w);
+    };
+    measure();
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) setWidth(Math.floor(entry.contentRect.width));
     });
-    observer.observe(ref.current);
-    setWidth(Math.floor(ref.current.clientWidth));
-    return () => observer.disconnect();
+    observer.observe(node);
+    observerRef.current = observer;
   }, []);
 
-  return [ref, width];
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
+  return [containerRef, width];
 }
 
 function NodeDetails({ node }) {
@@ -156,7 +178,7 @@ export default function CareerGraph({ paths, opps, loading, error, onRetry, sele
 
   useEffect(() => {
     if (!loading && nodes.length > 0) {
-      const t = setTimeout(fitView, 400);
+      const t = setTimeout(fitView, 800);
       return () => clearTimeout(t);
     }
     return undefined;
@@ -172,7 +194,7 @@ export default function CareerGraph({ paths, opps, loading, error, onRetry, sele
     ctx.fillStyle = type.color;
     ctx.fill();
     ctx.lineWidth = isActive ? 3 : 1.5;
-    ctx.strokeStyle = isActive ? '#0f172a' : '#ffffff';
+    ctx.strokeStyle = isActive ? '#0f172a' : '#1e293b';
     ctx.stroke();
 
     const label = node.label;
@@ -259,8 +281,8 @@ export default function CareerGraph({ paths, opps, loading, error, onRetry, sele
                 linkLabel={(link) => link.label}
                 linkDirectionalArrowLength={4}
                 linkDirectionalArrowRelPos={1}
-                linkColor={() => '#cbd5e1'}
-                linkWidth={1.2}
+                linkColor={() => '#475569'}
+                linkWidth={1.5}
                 cooldownTicks={120}
               />
             )}
