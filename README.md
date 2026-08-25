@@ -279,15 +279,16 @@ careergraph/
 ```env
 COGNODB_URI=bolt+s://your-instance.databases.cognodb.com
 COGNODB_USERNAME=cognodb
-COGNODB_PASSWORD=your_private_password
+COGNODB_PASSWORD=
 PORT=5000
-CLIENT_URL=http://localhost:5173
+Frontend (Vercel): https://wex-liart.vercel.app
+Backend (Render): https://wex-x2ah.onrender.com
 ```
 
 ### Frontend (`client/.env`)
 
 ```env
-VITE_API_URL=http://localhost:5000
+Frontend (Vercel): https://wex-liart.vercel.app
 ```
 
 **Never commit `.env`.** The repository already excludes `.env` via `.gitignore`. Use `.env.example` as a template.
